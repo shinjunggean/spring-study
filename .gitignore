@@ -1,0 +1,14 @@
+# Eclipse Workspace (절대 올리면 안됨)
+.metadata/
+Servers/
+
+# Maven
+**/target/
+
+# Eclipse Project Files
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
