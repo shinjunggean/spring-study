@@ -7,3 +7,5 @@ CREATE USER 'springdbuser'@'%' IDENTIFIED BY 'springdbuser';
 -- 데이터베이스 권한 설정
 GRANT ALL PRIVILEGES ON springdb.* TO 'springdbuser'@'localhost';
 GRANT ALL PRIVILEGES ON springdb.* TO 'springdbuser'@'%';
+
+
