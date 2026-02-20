@@ -2,29 +2,48 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd		
+		http://mybatis.org/schema/mybatis-spring
+	  	http://mybatis.org/schema/mybatis-spring.xsd">
 
-	<!-- org.zerock.service 패키지를 스캔할 것을 지정
-		스프링이 시작할 때 해당 패키지에 있는 클래스들을 스캔하면서
-		@service 어노테이션이 존재하는 클래스를 찾아서 객체를 생성하고 이를 빈(Bean)으로 등록  -->
-	<context:component-scan base-package="org.zerock.service"/>
+
+	<!-- org.zerock.service 패키지를 스캔할 것을 지정 스프링이 시작할 때 해당 패키지에 있는 클래스들을 스캔하면서 
+		@service 어노테이션이 존재하는 클래스를 찾아서 객체를 생성하고 이를 빈(Bean)으로 등록 -->
+	<context:component-scan
+		base-package="org.zerock.service" />
 	<!-- bean definitions here -->
 	<!-- hikariConfig 클래스의 객체를 생성하여 빈으로 등록 -->
 	<bean name="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
-    <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
-    <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/springdb"/>
-    <property name="username" value="springdbuser"/>
-    <property name="password" value="springdbuser"/>
-    <property name="connectionTimeout" value="30000"/>	<!-- 사용 가능한 Connection을 얻기 위해 최대 대기할 수 있는 시간(ms) -->
-    <property name="minimumIdle" value="2"/>	<!-- 아무 요청이 없어도 최소 2개는 항상 살아있게 유지 -->
-    <!-- 이 외에도 maximumPoolSize(풀에서 허용할 최대 커넥션 수, 기본값 10) -->
-</bean>
+		<property name="driverClassName"
+			value="com.mysql.cj.jdbc.Driver" />
+		<property name="jdbcUrl"
+			value="jdbc:mysql://localhost:3306/springdb" />
+		<property name="username" value="springdbuser" />
+		<property name="password" value="springdbuser" />
+		<property name="connectionTimeout" value="30000" />	<!-- 사용 가능한 Connection을 얻기 위해 최대 대기할 수 있는 시간(ms) -->
+		<property name="minimumIdle" value="2" />	<!-- 아무 요청이 없어도 최소 2개는 항상 살아있게 유지 -->
+		<!-- 이 외에도 maximumPoolSize(풀에서 허용할 최대 커넥션 수, 기본값 10) -->
+	</bean>
 
-<bean name="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
-	<!-- dataSource라는 이름의 빈을 등록할 때 해당 생성자에 주입하기 위해 생성자의 인자값으로 hikariConfig를 전달 -->
-    <constructor-arg ref="hikariConfig"/>
-</bean>
+	<bean name="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+		destroy-method="close">
+		<!-- dataSource라는 이름의 빈을 등록할 때 해당 생성자에 주입하기 위해 생성자의 인자값으로 hikariConfig를 
+			전달 -->
+		<constructor-arg ref="hikariConfig" />
+	</bean>
+
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- MyBatis가 사용할 DB 연결 풀을 지정 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- resources의 mapper 폴더 안의 모든 xml 파일을 매퍼 파일의 위치로 지정 -->
+		<property name="mapperLocations" value="classpath:/mapper/*.xml"/>
+	</bean>
+	
+	<!-- component-scan과 유사하게 특정 패키지 내부를 스캔해서 MyBatis 매퍼 인터페이스로 처리하는 역할 -->
+	<mybatis-spring:scan base-package="org.zerock.mapper"/>
 
 </beans>
