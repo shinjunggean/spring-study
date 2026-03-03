@@ -35,6 +35,8 @@ public class HelloController {
 	@GetMapping("/ex1")
 	public void ex1() {
 		log.info("/sample/ex1");
+		
+		helloService.hello1();
 	}
 	// 메소드가 void이면 스프링이 요청 URL 기반으로 뷰 이름을 추론
 	// 즉, 사용된 요청 경로 = 뷰 이름
@@ -42,6 +44,8 @@ public class HelloController {
 	@GetMapping("/ex2")
 	public String ex2() {
 		log.info("/sample/ex2");
+		
+		helloService.hello2("Hong Gil Dong");
 		
 		return "sample/success";
 	}

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd"> <!-- <select> 등을 만들 때 자동완성 기능이 작동 -->
+<mapper namespace="org.zerock.mapper.ProductMapper"> <!-- 반드시 매퍼 인터페이스와 동일한 이름을 사용 -->
+
+	<insert id="insert">
+		<!-- ProductDTO를 추가하는 과정에서 새롭게 만들어진 상품의 번호로 상품 이미지를 추가해야 하기 때문에 LAST_INSERT_ID()를 
+			이용해서 insert된 상품의 번호를 알 수 있도록 구성 -->
+		<selectKey keyProperty="pno" resultType="Integer"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+
+		INSERT INTO tbl_product(pname, pdesc, price, sale, writer)
+		VALUES(#{pname}, #{pdesc}, #{price}, TRUE, #{writer})
+	</insert>
+
+	<insert id="insertImage">
+		INSERT INTO tbl_product_image (pno, filename, uuid, ord)
+		VALUES
+		<foreach collection="imageList" item="image" separator=",">
+			(#{pno}, #{image.fileName}, #{image.uuid}, #{image.ord})
+		</foreach>
+	</insert>
+
+
+
+	<select id="selectOne" resultMap="selectMap">
+		SELECT p.pno, pname, pdesc,
+		price, sale, writer, p.regdate, ino, uuid,
+		filename, ord
+		FROM
+		tbl_product p
+		LEFT JOIN tbl_product_image pimg ON p.pno = pimg.pno
+		WHERE p.pno = #{pno}
+		ORDER BY pimg.ord
+	</select>
+
+	<resultMap type="ProductDTO" id="selectMap">
+		<id property="pno" column="pno" />
+		<result property="pname" column="pname" />
+		<result property="pdesc" column="pdesc" />
+		<result property="price" column="price" />
+		<result property="sale" column="sale" />
+		<result property="writer" column="writer" />
+
+		<!-- 다수의 상품 이미지 결과를 List<ProductImageDTO>로 매핑 -->
+		<!-- ofType: 컬렉션 요소의 타입 -->
+		<collection property="imageList" ofType="ProductImageDTO">
+			<id property="ino" column="ino" />
+			<result property="uuid" column="uuid" />
+			<result property="fileName" column="filename" />
+			<result property="ord" column="ord" />
+		</collection>
+	</resultMap>
+
+	<update id="deleteOne">
+		UPDATE tbl_product
+		SET sale = FALSE
+		WHERE pno = #{pno}
+	</update>
+
+	<delete id="deleteImages">
+		DELETE FROM tbl_product_image
+		WHERE pno = #{pno}
+	</delete>
+
+	<update id="updateOne">
+		UPDATE tbl_product
+		SET
+		pname = #{pname},
+		pdesc = #{pdesc},
+		price = #{price}
+		WHERE pno = #{pno}
+	</update>
+
+	<select id="list" resultType="ProductListDTO">
+		SELECT *
+		FROM tbl_product p
+		LEFT JOIN tbl_product_image pimg ON p.pno = pimg.pno
+		WHERE pimg.ord = 0
+		ORDER BY p.pno DESC
+		LIMIT #{count} OFFSET #{skip};
+	</select>
+	
+	<select id="listCount">
+		SELECT COUNT(*)
+		FROM tbl_product p
+	</select>
+
+</mapper>
